@@ -1,8 +1,9 @@
 #import "nsassetmanager_p.h"
+#import <AssetsLibrary/AssetsLibrary.h>
 
 
 @interface NSAssetManagerPrivate() {
-    ALAssetsLibrary* _lib;
+    ALAssetsLibrary * _lib;
 }
 
 @end

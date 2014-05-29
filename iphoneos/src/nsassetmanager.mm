@@ -5,6 +5,7 @@
 // typedef void(^SaveImageCompletion)(NSError* error);
 
 #import <UIKit/UIKit.h>
+#import <AssetsLibrary/AssetsLibrary.h>
 
 
 static void qt_mac_deleteImage( void *image, const void *, size_t )
@@ -33,8 +34,7 @@ void NSAssetManager::saveImage( const QImage& img, const QString& album  )
 
     // dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 
-    NSURL    * url = [alsa createAsset:uimg];
-        
+    NSURL * url = [alsa createAsset:uimg];
     if ( url == nil ) {
         // emit done();
         return;
@@ -183,7 +183,7 @@ UIImage* NSAssetManager::uiimage( const QImage& inImage )
                             dataProvider, 0, false,
                             kCGRenderingIntentDefault );
 
-    UIImage*    uiimg = [[UIImage alloc] initWithCGImage:imgRef scale:1.0 orientation:UIImageOrientationUp];
+    UIImage*    uiimg = [[UIImage alloc] initWithCGImage:imgRef];
 
     CGImageRelease( imgRef );
     CGColorSpaceRelease( colSpace );
