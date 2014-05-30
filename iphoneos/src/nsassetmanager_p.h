@@ -1,10 +1,9 @@
 #ifndef NSASSETMANAGER_P_H
 #define NSASSETMANAGER_P_H
 
-#import  <UIKit/UIImage.h>
+#import  <UIKit/UIKit.h>
 #import  <Foundation/Foundation.h>
 #import  <AssetsLibrary/AssetsLibrary.h>
-
 
 @interface NSAssetManagerPrivate : NSObject
 

@@ -1,5 +1,4 @@
 #import "nsassetmanager_p.h"
-#import <AssetsLibrary/AssetsLibrary.h>
 
 
 @interface NSAssetManagerPrivate() {
@@ -24,8 +23,10 @@
 
 - (void) dealloc
 {
+#if !__has_feature(objc_arc)
     [_lib release];
     [super dealloc];
+#endif
 }
 
 
@@ -44,29 +45,42 @@
                               dispatch_semaphore_signal(sema);
                               return;
                           }
-
+                        #if !__has_feature(objc_arc)
                           url = [assetURL retain];
+                        #else
+                          url = assetURL;
+                        #endif
                           dispatch_semaphore_signal(sema);
                       }];
     //});
     dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+    
+#if !__has_feature(objc_arc)
     dispatch_release(sema);
+#endif
 
     return url;
 }
 
 - (ALAsset*) findAsset:(NSURL*)url
 {
+    
+#if !__has_feature(objc_arc)
     // [_lib retain];
     [url retain];
+#endif
     __block ALAsset * assetImage = nil;
     
     dispatch_semaphore_t   sema = dispatch_semaphore_create(0);
     //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     [_lib assetForURL:url resultBlock:^(ALAsset *asset) {
 
+#if !__has_feature(objc_arc)
               assetImage = [asset retain];
-        
+#else
+              assetImage = asset;
+#endif
+
               NSLog(@"Trying to add asset: \"%@\" ", asset);
 
               dispatch_semaphore_signal(sema);
@@ -79,10 +93,14 @@
           }];
     //});
     dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+    
+#if !__has_feature(objc_arc)
     dispatch_release(sema);
 
     [url release];
     // [_lib release];
+#endif
+    
     return assetImage;
 }
 
@@ -103,7 +121,12 @@
                                 //target album is found
                                 // stop = YES;
                                 albumWasFound = YES;
+                                
+                            #if !__has_feature(objc_arc)
                                 grp = [group retain];
+                            #else
+                                grp = group;
+                            #endif
 
                                 //[album release];
                                 dispatch_semaphore_signal(sema);
@@ -130,7 +153,10 @@
                 }];
     //});
     dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+    
+#if !__has_feature(objc_arc)
     dispatch_release(sema);
+#endif
 
     return grp;
 }
@@ -144,7 +170,11 @@
     [_lib addAssetsGroupAlbumWithName: [NSString stringWithString:album]
                           resultBlock:^(ALAssetsGroup *group) {
 
-                          grp = [group retain];
+                        #if !__has_feature(objc_arc)
+                            grp = [group retain];
+                        #else
+                            grp = group;
+                        #endif
 
                           dispatch_semaphore_signal(sema);
             } failureBlock: ^(NSError* error){
@@ -156,9 +186,12 @@
             }];
     //});
     dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+#if !__has_feature(objc_arc)
     dispatch_release(sema);
+#endif
 
     return grp;
 }
 
 @end
+

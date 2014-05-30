@@ -23,13 +23,12 @@ void AsynchImageIO::exec()
 {
 
 #if defined(Q_OS_IOS)
-    NSAssetManager * mgr = new NSAssetManager();
-    mgr->saveImage( m_img, "Test-App" );
-    mgr->deleteLater();
+    NSAssetManager mgr;
+    mgr.saveImage( m_img, "Test-App" );
     // saveToGalleryIOS( m_img );
 #else
     m_img.save( m_path );
-    emit done();
 #endif
 
+    emit done();
 }

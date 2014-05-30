@@ -1,65 +1,77 @@
 #import "nsassetmanager.h"
 #import "nsassetmanager_p.h"
-#import "nsstringext.h"
-
-// typedef void(^SaveImageCompletion)(NSError* error);
 
 #import <UIKit/UIKit.h>
 #import <AssetsLibrary/AssetsLibrary.h>
 
+
+#ifdef QT_VERSION
 
 static void qt_mac_deleteImage( void *image, const void *, size_t )
 {
     delete static_cast<QImage *>(image);
 }
 
+#endif
 
-NSAssetManager::NSAssetManager( QObject* parent ) :
-    QObject( parent ),
+
+NSAssetManager::NSAssetManager( /* QObject* parent */ ) :
+    // QObject( parent ),
     m_d( [[NSAssetManagerPrivate alloc] init] )
 { }
 
 NSAssetManager::~NSAssetManager()
 {
-    m_d = nil;
-    // [m_d release];
+#if !__has_feature(objc_arc)
+    [m_d release];
+#endif
 }
 
-void NSAssetManager::saveImage( const QImage& img, const QString& album  )
+void NSAssetManager::saveImage( UIImage *img, const std::string& album )
 {
     NSAssetManagerPrivate * alsa = m_d; // [[NSAssetManagerPrivate alloc] init];
-    
-    UIImage  * uimg    = NSAssetManager::uiimage( img );
-    NSString * nsalbum = [NSString stringWithString:album.toStdString()];
+    NSString *    nsalbum = [NSString stringWithUTF8String:album.c_str()];
+
+    NSURL   * url    = nil;
+    ALAsset * assete = nil;
+    ALAssetsGroup * group = nil;
 
     // dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 
-    NSURL * url = [alsa createAsset:uimg];
+    url = [alsa createAsset:img];
     if ( url == nil ) {
-        // emit done();
         return;
     }
 
     NSLog( @"Asset image created at \"%@\"", url );
 
-    ALAsset *       asset = [alsa findAsset:url];
-    ALAssetsGroup * group = [alsa findAlbum:nsalbum];
+    [alsa findAlbum:nsalbum];
     if ( group == nil ) {
-        group = [m_d createAlbum:nsalbum];
+        group = [alsa createAlbum:nsalbum];
     }
 
-    if ( asset != nil && group != nil ) {
-        [group addAsset:asset];
+    assete = [alsa findAsset:url];
+    if ( assete != nil && group != nil ) {
+        [group addAsset:assete];
     }
+    
+#if !__has_feature(objc_arc)
+    if ( assete ) [assete release];
+    if ( group ) [group release];
+    if ( url ) [url release];
 
-    // if ( asset ) [asset release];
-    // if ( group ) [group release];
-    // if ( url ) [url release];
-        
     // [alsa release];
-    // });
+#endif
 
-    // emit done();
+    // });
+}
+
+#ifdef QT_VERSION
+
+void NSAssetManager::saveImage( const QImage& img, const QString& album  )
+{
+    UIImage * uimg = NSAssetManager::uiimage( img );;
+    saveImage( uimg, album.toStdString() );
 }
 
 /* static void NSAssetManager::saveImage(...)
@@ -197,3 +209,4 @@ CGDataProviderRef NSAssetManager::CGDataProvider( const QImage &img )
     return CGDataProviderCreateWithData( new QImage(img), img.bits(), img.byteCount(), qt_mac_deleteImage );
 }
 
+#endif

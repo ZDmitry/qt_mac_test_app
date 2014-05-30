@@ -17,11 +17,9 @@ HEADERS += \
     $$PWD/src/nsassetmanager.h
 
 OBJECTIVE_HEADERS += \
-    $$PWD/src/nsstringext.h \
     $$PWD/src/nsassetmanager_p.h
 
 OBJECTIVE_SOURCES += \
-    $$PWD/src/nsstringext.mm \
     $$PWD/src/nsassetmanager.mm \
     $$PWD/src/nsassetmanager_p.m
 

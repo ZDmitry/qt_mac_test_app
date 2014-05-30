@@ -16,31 +16,32 @@ typedef struct CGImage        *CGImageRef;
 typedef struct CGDataProvider *CGDataProviderRef;
 
 // Qt
+#include <string>
 #include <QObject>
 #include <QString>
 #include <QImage>
 
 
-class NSAssetManager : public QObject
+class NSAssetManager // : public QObject
 {
-    Q_OBJECT
     NSAssetManagerPrivate * m_d;
 
 public:
-    NSAssetManager( QObject* parent = 0 );
+    NSAssetManager( /* QObject* parent = 0 */ );
     ~NSAssetManager();
 
+    void saveImage( UIImage* img, const std::string& album );
+
+#ifdef QT_VERSION
     void saveImage( const QImage& img, const QString& album );
     // static void saveImage1( const QImage& img, const QString& album );
-
-signals:
-    void done();
 
 protected:
     static UIImage*  uiimage( const QImage& img );
 
 private:
     static CGDataProviderRef CGDataProvider( const QImage& img );
+#endif
 
 };
 
